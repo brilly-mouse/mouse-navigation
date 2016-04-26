@@ -36,12 +36,12 @@ class Board():
                         if x == 7:
                             initial[1] = "G"
                     elif row == 0: 
-                        if box[0]:
-                            if([x,y] == self.mouseLocation):
-                                initial[0] = " M "
+                        # if box[0]:
+                            # if([x,y] == self.mouseLocation):
+                                # initial[0] = " M "
                         # if box[1]:
                             # initial[1] = "|"
-                    elif row == 1:
+                        # elif row == 1:
 
                         if( box[2]):
                             if(y == self.sideLength -1):
@@ -82,6 +82,12 @@ class Board():
 
     def inBounds(self,x,y):
         return x >= 0 and x < self.sideLength and y >= 0 and y < self.sideLength
+    
+    def neighbors(self, x, y):
+        return [[x,y-1],[x+1,y],[x,y+1],[x-1,y]]
+
+    def inGoal(self,x,y):
+        return x in (7,8) and y in (7,8)
 
 
 

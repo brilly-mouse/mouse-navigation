@@ -2,6 +2,8 @@ from Queue import PriorityQueue
 class Mouse():
     def __init__(self, xi, yi, direction, board):
         self.x = xi
+        self.startX = xi
+        self.startY = yi
         self.y = yi
         self.direction = direction
         self.board = board;
@@ -48,27 +50,85 @@ class Mouse():
         x = xy[0]
         y = xy[1]
         return x >= 0 and x < self.board.sideLength and y >= 0 and y < self.board.sideLength
+    def inBounds(self, x,y):
+        return x >= 0 and x < self.board.sideLength and y >= 0 and y < self.board.sideLength
 
-    def inGoal(self):
+    def inGoal(self, x= None, y=None):
+        if(x == None and y == None):
+            x = self.x
+            y = self.y
         middleCoord = (self.board.sideLength//2 -1, self.board.sideLength//2)
-        return self.x in middleCoord and self.y in middleCoord
+        return x in middleCoord and y in middleCoord
     
-    def manhattanDistance(self):
+    def manhattanDistance(self, x= None, y=None):
+        if(x == None and y == None):
+            x = self.x
+            y = self.y
         lowMiddle = self.board.sideLength//2 -1
         highMiddle = self.board.sideLength//2
 
-        xD = min(abs(lowMiddle - self.x), abs(highMiddle - self.x))
-        yD = min(abs(lowMiddle - self.y), abs(highMiddle - self.y))
+        xD = min(abs(lowMiddle - x), abs(highMiddle - x))
+        yD = min(abs(lowMiddle - y), abs(highMiddle - y))
         return xD + yD
 
-    def euclideanDistance(self):
+    def startDistanceTraveled(self, x=None,y=None):
+        if x is None and y == None:
+            x = self.x
+            y = self.y
+        return abs(self.startX - x) + abs(self.startY - y)
+
+    def euclideanDistance(self, x= None, y=None):
+        if(x == None and y == None):
+            x = self.x
+            y = self.y
         lowMiddle = self.board.sideLength//2 -1
         highMiddle = self.board.sideLength//2
-        xD = min(abs(lowMiddle - self.x), abs(highMiddle - self.x))
-        yD = min(abs(lowMiddle - self.y), abs(highMiddle - self.y))
+        xD = min(abs(lowMiddle - x), abs(highMiddle - x))
+        yD = min(abs(lowMiddle - y), abs(highMiddle - y))
         return sqrt(xD**2 + yD**2)
 
-    # def AStarSearch():
+
+
+    """
+    Returns a list of (x,y) coordinates to take to reach the goal
+    """
+    def AStarSearch(self):
+        nodesToSearch = PriorityQueue()
+        first=  Node(self.x,self.y, self)
+        nodesToSearch.put(first)
+        visited = [[0 for _x in range(self.board.sideLength)] for _y in range(self.board.sideLength)]
+        visited[first.x][first.y] = 1
+        directions = [0,1,2,3]
+
+        solution = first # temp value, will be replaced when reached the end
+        while not nodesToSearch.empty():
+            parent = nodesToSearch.get() # first node pulled out
+            print str(parent.x) + " " + str(parent.y) + " priority " + str(parent.priority)
+
+            visited[parent.x][parent.y] = 1
+            if self.board.inGoal(parent.x, parent.y): # reached goal
+                print "solution reached"
+                s = str(parent.x) + " " + str(parent.y)
+                print s
+                solution = parent
+                break
+            neighbors = zip(directions,self.board.neighbors(parent.x, parent.y))
+            print neighbors
+            toVisit = [Node(coord[0],coord[1],self,parent) for d,coord in neighbors if self.board.inBounds(coord[0],coord[1]) and self.board.boundaries[coord[0]][coord[1]][d] == 0 and visited[coord[0]][coord[1]] == 0]
+            # toVisit is the neighbor spaces that are unvisited, have no boundaries, in bounds
+            for n in toVisit:
+                nodesToSearch.put(n)
+                print str(n.x) + " " + str(n.y) + " " + str(n.priority)
+
+        path = []
+
+        while solution is not  None:
+            path = [(solution.x, solution.y)] + path
+            solution = solution.parent
+        print path    
+        return path
+
+
 
 
 
@@ -133,4 +193,14 @@ class Mouse():
 
 
 
+class Node():
+    def __init__(self, x,y, mouse, parent=None):
+        self.x = x
+        self.y = y
+        self.parent = parent
+        self.mouse = mouse
+        self.priority = mouse.manhattanDistance(self.x,self.y) + mouse.startDistanceTraveled(self.x, self.y)
+
+    def __cmp__(self, other):
+        return cmp(self.priority, other.priority)
 

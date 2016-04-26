@@ -17,15 +17,15 @@ board = Board()
 mouse = Mouse(x,y,direction,board)
 
 
-# for i in range(0, 15, 3):
-    # for j in range(16):
-        # board.addBound(i,j,1)    
+for i in range(1, 3, 3):
+    for j in range(11):
+        board.addBound(i,j,1)    
 
 
 print mouse.printBoard()
-commands = ('w','a','s','d','q')
+commands = ('w','a','s','d','q','p')
 while(True):
-    command = raw_input("wasd to move, q to quit:")
+    command = raw_input("wasd to move, q to quit, p to print path:")
     if command == 'q':
         break
     else:
@@ -37,6 +37,8 @@ while(True):
             mouse.moveBack()
         elif command == 'd':
             mouse.turnRight()
+        elif command == 'p':
+            print mouse.AStarSearch()
         
     print mouse.printBoard()
     if( mouse.inGoal()):
