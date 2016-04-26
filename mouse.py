@@ -7,6 +7,7 @@ class Mouse():
         self.y = yi
         self.direction = direction
         self.board = board;
+        self.saved_path = []
 
     """
     Changes x and y if moving forward is open and in bounds
@@ -71,12 +72,6 @@ class Mouse():
         yD = min(abs(lowMiddle - y), abs(highMiddle - y))
         return xD + yD
 
-    def startDistanceTraveled(self, x=None,y=None):
-        if x is None and y == None:
-            x = self.x
-            y = self.y
-        return abs(self.startX - x) + abs(self.startY - y)
-
     def euclideanDistance(self, x= None, y=None):
         if(x == None and y == None):
             x = self.x
@@ -86,7 +81,6 @@ class Mouse():
         xD = min(abs(lowMiddle - x), abs(highMiddle - x))
         yD = min(abs(lowMiddle - y), abs(highMiddle - y))
         return sqrt(xD**2 + yD**2)
-
 
 
     """
@@ -103,7 +97,7 @@ class Mouse():
         solution = first # temp value, will be replaced when reached the end
         while not nodesToSearch.empty():
             parent = nodesToSearch.get() # first node pulled out
-            print str(parent.x) + " " + str(parent.y) + " priority " + str(parent.priority)
+            print "parent " + str(parent.x) + " " + str(parent.y) + " priority " + str(parent.priority)
 
             visited[parent.x][parent.y] = 1
             if self.board.inGoal(parent.x, parent.y): # reached goal
@@ -113,19 +107,25 @@ class Mouse():
                 solution = parent
                 break
             neighbors = zip(directions,self.board.neighbors(parent.x, parent.y))
-            print neighbors
-            toVisit = [Node(coord[0],coord[1],self,parent) for d,coord in neighbors if self.board.inBounds(coord[0],coord[1]) and self.board.boundaries[coord[0]][coord[1]][d] == 0 and visited[coord[0]][coord[1]] == 0]
+            # print neighbors
+            for d,coord, in neighbors:
+                n = (Node(coord[0],coord[1],self,parent.distance, parent))
+                if self.board.inBounds(coord[0],coord[1]) and self.board.boundaries[parent.x][parent.y][d] == 0 and visited[coord[0]][coord[1]] == 0:
+                    n = (Node(coord[0],coord[1],self,parent.distance, parent))
+                    nodesToSearch.put(n)
+            # toVisit = [Node(coord[0],coord[1],self,parent.distance, parent) for d,coord in neighbors if self.board.inBounds(coord[0],coord[1]) and self.board.boundaries[coord[0]][coord[1]][d] == 0 and visited[coord[0]][coord[1]] == 0]
             # toVisit is the neighbor spaces that are unvisited, have no boundaries, in bounds
-            for n in toVisit:
-                nodesToSearch.put(n)
-                print str(n.x) + " " + str(n.y) + " " + str(n.priority)
+            # for n in toVisit:
+                # nodesToSearch.put(n)
+                    print "possible " + str(n.x) + " " + str(n.y) + " " + str(n.priority) + " " + str(d) 
+                    print str(self.board.inBounds(coord[0],coord[1])) +  str(self.board.boundaries[parent.x][parent.y][d]) +  str(visited[coord[0]][coord[1]] == 0)
 
         path = []
 
         while solution is not  None:
             path = [(solution.x, solution.y)] + path
             solution = solution.parent
-        print path    
+        self.saved_path  = path
         return path
 
 
@@ -172,6 +172,8 @@ class Mouse():
                     elif row == 0: 
                         if(x == self.x and y == self.y):
                             initial[0] = " {0} ".format(self.printDirection())
+                        elif (x,y) in self.saved_path:
+                            initial[0] = " * "
                         # if box[1]:
                             # initial[1] = "|"
                     elif row == 1:
@@ -194,12 +196,13 @@ class Mouse():
 
 
 class Node():
-    def __init__(self, x,y, mouse, parent=None):
+    def __init__(self, x,y, mouse, distance=-1, parent=None):
         self.x = x
         self.y = y
         self.parent = parent
         self.mouse = mouse
-        self.priority = mouse.manhattanDistance(self.x,self.y) + mouse.startDistanceTraveled(self.x, self.y)
+        self.distance = distance + 1
+        self.priority = mouse.manhattanDistance(x,y) + self.distance
 
     def __cmp__(self, other):
         return cmp(self.priority, other.priority)

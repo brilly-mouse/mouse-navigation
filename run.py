@@ -16,10 +16,16 @@ if(len(sys.argv) >= 4 ):
 board = Board()
 mouse = Mouse(x,y,direction,board)
 
+# 
+for i in range(0,16,3):
+    for j in range(15):
+        if(i%2 ==0):
+            increment = 1
+        else:
+            increment = 0
+        board.addBound(i,j+increment,1)
 
-for i in range(1, 3, 3):
-    for j in range(11):
-        board.addBound(i,j,1)    
+
 
 
 print mouse.printBoard()
