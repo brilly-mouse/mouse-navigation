@@ -13,7 +13,8 @@ class Mouse():
     Changes x and y if moving forward is open and in bounds
     """
     def move(self):
-        if not self.facingWall() and self.inBounds(self.forwardCoordinates()):
+        coordTuple = self.forwardCoordinates()
+        if not self.facingWall() and self.inBounds(coordTuple[0], coordTuple[1]):
            (self.x, self.y) = self.forwardCoordinates()
         if self.facingWall():
             print "Mouse is facing wall"
@@ -47,10 +48,10 @@ class Mouse():
 
     def turnLeft(self):
         self.direction = (self.direction - 1 + 4)%4
-    def inBounds(self, xy):
-        x = xy[0]
-        y = xy[1]
-        return x >= 0 and x < self.board.sideLength and y >= 0 and y < self.board.sideLength
+    # def inBounds(self, xy):
+        # x = xy[0]
+        # y = xy[1]
+        # return x >= 0 and x < self.board.sideLength and y >= 0 and y < self.board.sideLength
     def inBounds(self, x,y):
         return x >= 0 and x < self.board.sideLength and y >= 0 and y < self.board.sideLength
 
