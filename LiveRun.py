@@ -62,8 +62,8 @@ class LiveRun():
 
     """ Floodfill algorithm """
     def floodFillToGoal(self):
-        while(not self.mouse.inGoal):
-            self.mouse.path = self.mouse.AStarSearch
+        while(not self.mouse.inGoal()):
+            self.mouse.path = self.mouse.AStarSearch()
             self.followPath()
             # will follow path to completion if walls appropriate
             # recalculates path if followpath returns
@@ -71,7 +71,7 @@ class LiveRun():
     """
     Keeps moving mouse to through path. Returns if path completed or walls are updated
     """
-    def followPath(self, path):
+    def followPath(self):
         while(self.mouse.path):
             moveSuccess = self.moveToSquare(self.mouse.x, self.mouse.y)
             if moveSuccess:
