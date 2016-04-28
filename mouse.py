@@ -1,6 +1,17 @@
 from Queue import PriorityQueue
+from LiveRun import LiveRun
+from SimRun import SimRun
+
+
 class Mouse():
-    def __init__(self, xi, yi, direction, board):
+    """
+        xi  -       initial x coordinate start
+        yi  -       initial y coordinate start
+        direction - initial direction of mouse {0:up, 1:right, 2:down, 3:left}
+        board   -   board object to modify over time
+        realRun -   1 for real run, 0 for simulation
+    """
+    def __init__(self, xi, yi, direction, board, realRun):
         self.x = xi
         self.startX = xi
         self.startY = yi
@@ -8,17 +19,10 @@ class Mouse():
         self.direction = direction
         self.board = board;
         self.saved_path = []
-
-    """
-    Changes x and y if moving forward is open and in bounds
-    """
-    def move(self):
-        coordTuple = self.forwardCoordinates()
-        if not self.facingWall() and self.inBounds(coordTuple[0], coordTuple[1]):
-           (self.x, self.y) = self.forwardCoordinates()
-        if self.facingWall():
-            print "Mouse is facing wall"
-
+        if(realRun):
+            self.action = LiveRun(self)
+        else:
+            self.action = SimRun(self)
     """
     Returns coordinates of moving forward one move in (x,y) form
 
@@ -33,25 +37,29 @@ class Mouse():
         else:
             return (self.x -1, self.y)
 
+
+    """
+    Changes x and y if moving forward is open and in bounds
+    """
+    ##################### START SHARED METHOD CALLS TO LIVE/SIM RUNS #########################
+    def move(self):
+       self.action.move() 
+    
     def moveBack(self):
-        self.turnRight()
-        self.turnRight()
-        self.move()
-        self.turnRight()
-        self.turnRight()
+        self.action.moveBack()
 
     def facingWall(self):
-        return self.board.boundaries[self.x][self.y][self.direction]
+        return self.action.facingWall()
 
     def turnRight(self):
-        self.direction = (self.direction + 1)%4
+        self.action.turnRight()
 
     def turnLeft(self):
-        self.direction = (self.direction - 1 + 4)%4
-    # def inBounds(self, xy):
-        # x = xy[0]
-        # y = xy[1]
-        # return x >= 0 and x < self.board.sideLength and y >= 0 and y < self.board.sideLength
+        self.action.turnLeft()
+        
+    ##########################################################################################
+
+    # simulation function for mouse
     def inBounds(self, x,y):
         return x >= 0 and x < self.board.sideLength and y >= 0 and y < self.board.sideLength
 

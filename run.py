@@ -14,7 +14,7 @@ if(len(sys.argv) >= 4 ):
 
 
 board = Board()
-mouse = Mouse(x,y,direction,board)
+mouse = Mouse(x,y,direction,board,0)
 
 # 
 for i in range(0,16,3):
