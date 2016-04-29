@@ -1,6 +1,7 @@
 from Queue import PriorityQueue
 from LiveRun import LiveRun
 from SimRun import SimRun
+from board import Board
 
 
 class Mouse():
@@ -17,12 +18,14 @@ class Mouse():
         self.startY = yi
         self.y = yi
         self.direction = direction
-        self.board = board;
         self.saved_path = []
         if(realRun):
             self.action = LiveRun(self)
+            self.board = board
         else:
-            self.action = SimRun(self)
+            self.action = SimRun(self, board) # actual board will be provided to SimRun
+            self.board = Board() # mouse will be given board with no information
+            
     """
     Returns coordinates of moving forward one move in (x,y) form
 
@@ -37,6 +40,25 @@ class Mouse():
         else:
             return (self.x -1, self.y)
 
+    def rightCoordinates(self):
+        if self.direction == 0:
+            return (self.x + 1, self.y)
+        elif self.direction == 1:
+            return (self.x, self.y + 1)
+        elif self.direction == 2:
+            return (self.x-1, self.y)
+        else:
+            return (self.x, self.y -1)
+
+    def leftCoordinates(self):
+        if self.direction==0:
+            return (self.x - 1, self.y)
+        elif self.direction ==1:
+            return (self.x, self.y - 1)
+        elif self.direction ==2:
+            return (self.x + 1, self.y)
+        else:
+            return (self.x, self.y + 1)
 
     """
     Changes x and y if moving forward is open and in bounds
@@ -56,6 +78,16 @@ class Mouse():
 
     def turnLeft(self):
         self.action.turnLeft()
+
+    def detectFrontRightWall(self):
+        return self.action.detectFrontRightWall()
+    
+    def detectFrontLeftWall(self):
+        return self.action.detectFrontLeftWall()
+
+    def detectFrontWall(self):
+        return self.action.detectFrontWall()
+
         
     ##########################################################################################
 
@@ -106,13 +138,13 @@ class Mouse():
         solution = first # temp value, will be replaced when reached the end
         while not nodesToSearch.empty():
             parent = nodesToSearch.get() # first node pulled out
-            print "parent " + str(parent.x) + " " + str(parent.y) + " priority " + str(parent.priority)
+            # print "parent " + str(parent.x) + " " + str(parent.y) + " priority " + str(parent.priority)
 
             visited[parent.x][parent.y] = 1
             if self.board.inGoal(parent.x, parent.y): # reached goal
                 print "solution reached"
                 s = str(parent.x) + " " + str(parent.y)
-                print s
+                # print s
                 solution = parent
                 break
             neighbors = zip(directions,self.board.neighbors(parent.x, parent.y))
@@ -126,8 +158,8 @@ class Mouse():
             # toVisit is the neighbor spaces that are unvisited, have no boundaries, in bounds
             # for n in toVisit:
                 # nodesToSearch.put(n)
-                    print "possible " + str(n.x) + " " + str(n.y) + " " + str(n.priority) + " " + str(d) 
-                    print str(self.board.inBounds(coord[0],coord[1])) +  str(self.board.boundaries[parent.x][parent.y][d]) +  str(visited[coord[0]][coord[1]] == 0)
+                    # print "possible " + str(n.x) + " " + str(n.y) + " " + str(n.priority) + " " + str(d) 
+                    # print str(self.board.inBounds(coord[0],coord[1])) +  str(self.board.boundaries[parent.x][parent.y][d]) +  str(visited[coord[0]][coord[1]] == 0)
 
         path = []
 
@@ -153,57 +185,35 @@ class Mouse():
 
 
     def printBoard(self):
-        line = "||"
+        return self.action.printBoard()
 
-        for x in range(self.board.sideLength):
-            if self.board.boundaries[x][0][1]:
-                line += "===|"
+    ####################################### FLOODFILL ##################################################
+
+     """ Floodfill algorithm """
+    def floodFillToGoal(self):
+        while(not self.inGoal()):
+            self.path = self.AStarSearch()
+            self.followPath()
+            # will follow path to completion if walls appropriate
+            # recalculates path if followpath returns
+
+    """
+    Keeps moving mouse to through path. Returns if path completed or walls are updated
+    """
+    def followPath(self):
+        while(self.path):
+            moveSuccess = self.moveToSquare(self.x, self.y)
+            if moveSuccess:
+                self.path = self.path[1:] # truncate after sucessful move
             else:
-                line += "===="
-        line = line + "|\n"
-        for y in range(self.board.sideLength):
-            for row in range(2):
-                line += "||"
-                for x in range(self.board.sideLength):
-                    initial = ["   ", " "]
-                    # should only print according to what is on bottom and right, since adding left
-                    # and top is redundant with multiple boxes printed together.
-                    box = self.board.boundaries[x][y]
-                    if box[1]:
-                        initial[1] = "|"
+                return # when found walls unexpected
+        return # when finished following the path
+    
+    """ Moves to an adjacent square """
+    def moveToSquare(self, x, y):
+        self.action.moveToSquare(x,y)
 
-                    if x in (7,8) and y in (7,8):
-                        initial[0] = "GGG"
-                        if(x == self.x and y == self.y):
-                            initial[0] = "G{0}G".format(self.printDirection())
-                        if x == 7:
-                            initial[1] = "G" #override possiblity of vertical wall inside goal area
-                    elif row == 0: 
-                        if(x == self.x and y == self.y):
-                            initial[0] = " {0} ".format(self.printDirection())
-                        elif (x,y) in self.saved_path:
-                            initial[0] = " * "
-                        # if box[1]:
-                            # initial[1] = "|"
-                    elif row == 1:
-
-                        if( box[2]):
-                            if(y == self.board.sideLength -1):
-                                initial[0] = "==="
-                                initial[1] = "="
-                            else:
-                                initial[0]= "---"
-                                initial[1] = "-"
-                        if(box[1]):
-                            initial[1] = "|"
-                    line += "".join(initial)
-                line +="|\n"
-        return line
-
-
-
-
-
+    
 class Node():
     def __init__(self, x,y, mouse, distance=-1, parent=None):
         self.x = x
@@ -215,4 +225,6 @@ class Node():
 
     def __cmp__(self, other):
         return cmp(self.priority, other.priority)
+
+
 

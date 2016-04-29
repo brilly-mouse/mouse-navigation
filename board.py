@@ -89,6 +89,27 @@ class Board():
     def inGoal(self,x,y):
         return x in (7,8) and y in (7,8)
 
+    def save(self, filename="boardSave.txt"):
+        file = open(filename, "w")
+        for i in range(self.sideLength):
+            for j in range(self.sideLength):
+                for direction in range(4):
+                    file.write(str(self.boundaries[i][j][direction]))
+        file.close()
+    
+    def read(self, filename="boardSave.txt"):
+        file = open(filename, "r")
+        readVal = file.read()
+        file.close()
+        counter = 0
+        for i in range(self.sideLength):
+            for j in range(self.sideLength):
+                for direction in range(4):
+                    self.boundaries[i][j][direction] = int(readVal[counter])
+                    counter = counter + 1
+
+
+        
 
 
 
