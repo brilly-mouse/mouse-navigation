@@ -76,7 +76,7 @@ class Board():
         elif( direction ==1 and self.inBounds(x+1, y)):
             self.boundaries[x+1][y][3] = 1
         elif( direction == 2 and self.inBounds(x, y+1)):
-            self.boundaries[x][y][2] = 1
+            self.boundaries[x][y+1][0] = 1
         elif( direction == 3 and self.inBounds(x-1, y)):
             self.boundaries[x-1][y][1] = 1
 

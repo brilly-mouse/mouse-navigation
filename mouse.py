@@ -12,18 +12,19 @@ class Mouse():
         board   -   board object to modify over time
         realRun -   1 for real run, 0 for simulation
     """
-    def __init__(self, xi, yi, direction, board, realRun):
+    def __init__(self, xi, yi, direction, board, realRun, pause=0):
         self.x = xi
         self.startX = xi
         self.startY = yi
         self.y = yi
         self.direction = direction
         self.saved_path = []
+        self.pause = pause
         if(realRun):
             self.action = LiveRun(self)
             self.board = board
         else:
-            self.action = SimRun(self, board) # actual board will be provided to SimRun
+            self.action = SimRun(self, board, pause) # actual board will be provided to SimRun
             self.board = Board() # mouse will be given board with no information
             
     """
@@ -65,34 +66,42 @@ class Mouse():
     """
     ##################### START SHARED METHOD CALLS TO LIVE/SIM RUNS #########################
     def move(self):
-       self.action.move() 
+        return self.action.move() 
     
     def moveBack(self):
-        self.action.moveBack()
+        return self.action.moveBack()
 
     def facingWall(self):
         return self.action.facingWall()
 
     def turnRight(self):
-        self.action.turnRight()
+        return self.action.turnRight()
 
     def turnLeft(self):
-        self.action.turnLeft()
+        return self.action.turnLeft()
 
     def detectFrontRightWall(self):
+        if not self.inBounds(self.forwardCoordinates()):
+            return 0
         return self.action.detectFrontRightWall()
     
     def detectFrontLeftWall(self):
+        if not self.inBounds(self.forwardCoordinates()):
+            return 0
         return self.action.detectFrontLeftWall()
 
     def detectFrontWall(self):
+        if not self.inBounds(self.forwardCoordinates()):
+            return 0
         return self.action.detectFrontWall()
 
         
     ##########################################################################################
 
     # simulation function for mouse
-    def inBounds(self, x,y):
+    def inBounds(self, x,y=None):
+        if y == None:
+            return x[0] >= 0 and x[0] < self.board.sideLength and x[1] >= 0 and x[1] < self.board.sideLength
         return x >= 0 and x < self.board.sideLength and y >= 0 and y < self.board.sideLength
 
     def inGoal(self, x= None, y=None):
@@ -142,7 +151,7 @@ class Mouse():
 
             visited[parent.x][parent.y] = 1
             if self.board.inGoal(parent.x, parent.y): # reached goal
-                print "solution reached"
+                # print "solution reached"
                 s = str(parent.x) + " " + str(parent.y)
                 # print s
                 solution = parent
@@ -167,7 +176,7 @@ class Mouse():
             path = [(solution.x, solution.y)] + path
             solution = solution.parent
         self.saved_path  = path
-        return path
+        return path[1:]
 
 
 
@@ -189,7 +198,7 @@ class Mouse():
 
     ####################################### FLOODFILL ##################################################
 
-     """ Floodfill algorithm """
+    """ Floodfill algorithm """
     def floodFillToGoal(self):
         while(not self.inGoal()):
             self.path = self.AStarSearch()
@@ -202,7 +211,9 @@ class Mouse():
     """
     def followPath(self):
         while(self.path):
-            moveSuccess = self.moveToSquare(self.x, self.y)
+            path = self.path[0]
+            print path
+            moveSuccess = self.moveToSquare(path[0], path[1])
             if moveSuccess:
                 self.path = self.path[1:] # truncate after sucessful move
             else:
@@ -211,7 +222,33 @@ class Mouse():
     
     """ Moves to an adjacent square """
     def moveToSquare(self, x, y):
-        self.action.moveToSquare(x,y)
+        if self.pause:
+            print "movetoSquare " + str((x,y))
+            command = raw_input("press n to continue")
+            if command == "q":
+                exit()
+
+        turn = 1
+        if (x,y) == self.leftCoordinates() and (self.board.boundaries[self.x][self.y][(self.direction + 3)%4]==0):
+            print "left turning!!"
+            turn = self.turnLeft()
+        elif (x,y) == self.rightCoordinates() and (self.board.boundaries[self.x][self.y][(self.direction + 1)%4]==0):
+            print "right turning!!!!!"
+            turn = self.turnRight()
+        elif (x,y) ==  self.forwardCoordinates() and (self.board.boundaries[self.x][self.y][self.direction] == 0):
+            turn = 1
+            print "move forward"
+        elif self.board.boundaries[x][y][(self.direction + 2)%4] == 0:
+            # print "backward"
+            # print self.direction
+            # print (self.x, self.y)
+            # print (x,y)
+            # print self.forwardCoordinates()
+            # means it is behind
+            turn = all((self.turnRight(), self.turnRight()))
+        print "board realization: " + str(self.board.boundaries[x][y]) + " " + str(self.action.omniscientBoard.boundaries[x][y])+ "  " + str(x) + " " + str(y)
+        print self.printBoard()
+        return turn and self.move() #returns 1 if move is successful, 0 if move if move unexpected
 
     
 class Node():

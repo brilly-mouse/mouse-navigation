@@ -57,39 +57,8 @@ class LiveRun():
     def detectFrontWallDistance(self):
         return -1
 
-
-########################## BELOW METHODS MAY BELONG IN MOUSE.PY ######################
-
-    """ Floodfill algorithm """
-    def floodFillToGoal(self):
-        while(not self.mouse.inGoal()):
-            self.mouse.path = self.mouse.AStarSearch()
-            self.followPath()
-            # will follow path to completion if walls appropriate
-            # recalculates path if followpath returns
-
-    """
-    Keeps moving mouse to through path. Returns if path completed or walls are updated
-    """
-    def followPath(self):
-        while(self.mouse.path):
-            moveSuccess = self.moveToSquare(self.mouse.x, self.mouse.y)
-            if moveSuccess:
-                self.mouse.path = self.mouse.path[1:] # truncate after sucessful move
-            else:
-                return # when found walls unexpected
-        return # when finished following the path
     
-    """
-    Turns and moves to a new position, which should be adjacent to current spot. If new wall changes updated, returns 0
-    """
-    def moveToSquare(self,x,y):
-        #1) turn to correct direction
-        #2) move forward or backward
-        # when in range to see front right wall, call detectFrontRightWall or detectFrontLeftWall
-        # return 1 if moved to square as expected
-        # return 0 if boundaries found to be different
 
-        return -1
+
 
 

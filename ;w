@@ -37,7 +37,7 @@ while(True):
             mouse.board.addBound(mouse.x, mouse.y, 2)
         elif command == 'r':
             mouse.board.addBound(mouse.x, mouse.y, 1)
-        elif command == 'export':
+        elif command == 'e':
             mouse.board.save()
         elif command == "read":
             mouse.board.read()

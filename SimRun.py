@@ -1,14 +1,18 @@
 from board import Board
 class SimRun():
-    def __init__(self, mouse, board):
+    def __init__(self, mouse, board, pause):
         self.mouse = mouse
         self.omniscientBoard = board
+        self.pause = pause
         
     def move(self):
         coordTuple = self.mouse.forwardCoordinates()
+        wallsAsExpected = all((self.mouse.detectFrontWall(), self.mouse.detectFrontLeftWall(), self.mouse.detectFrontRightWall()))
         if not self.mouse.facingWall() and self.mouse.inBounds(coordTuple[0], coordTuple[1]):
            (self.mouse.x, self.mouse.y) = self.mouse.forwardCoordinates()
+           return wallsAsExpected
         if self.mouse.facingWall():
+            return False
             print "Mouse is facing wall"
 
         # move a certain distance and try to make sure that
@@ -26,8 +30,12 @@ class SimRun():
         #move backwards, similar to move() but reversed
     def turnRight(self):
         self.mouse.direction = (self.mouse.direction + 1)%4
+        return 1
+        # return any((self.mouse.detectFrontWall(), self.mouse.detectFrontLeftWall(), self.mouse.detectFrontRightWall()))
     def turnLeft(self):
         self.mouse.direction = (self.mouse.direction - 1 + 4)%4
+        return 1
+        # return any((self.mouse.detectFrontWall(), self.mouse.detectFrontLeftWall(), self.mouse.detectFrontRightWall()))
 
     def printBoard(self):
         line = "||"
@@ -92,4 +100,43 @@ class SimRun():
                     line += "".join(initial)
                 line +="|\n"
         return line
- 
+
+    """
+    Detects and updates walls if difference found
+    Returns if wall was as expected
+    """
+
+    def detectFrontRightWall(self):
+        direction = (1 + self.mouse.direction)%4
+        frontCoord = self.mouse.forwardCoordinates()
+        hasRealWall = self.omniscientBoard.boundaries[frontCoord[0]][frontCoord[1]][direction]
+        wallExpected = hasRealWall == self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction]
+        self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction] = hasRealWall
+        print "front right wall expected " + str(wallExpected)
+        # print "right" + str(hasRealWall) + " " + str(self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]])+ " " + str((frontCoord[0], frontCoord[1]))
+
+        return wallExpected
+
+    def detectFrontLeftWall(self):
+        direction = (3 + self.mouse.direction)%4
+        frontCoord = self.mouse.forwardCoordinates()
+        hasRealWall = self.omniscientBoard.boundaries[frontCoord[0]][frontCoord[1]][direction]
+        wallExpected = hasRealWall == self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction]
+        print "front left wall expected " + str(wallExpected)
+        self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction] = hasRealWall
+        # print "left" + str(hasRealWall)+ " " + str(self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]]) + " " + str((frontCoord[0], frontCoord[1]))
+
+        return wallExpected
+
+    def detectFrontWall(self):
+        direction = (0 + self.mouse.direction)%4
+        frontCoord = self.mouse.forwardCoordinates()
+        hasRealWall = self.omniscientBoard.boundaries[frontCoord[0]][frontCoord[1]][direction]
+        wallExpected = hasRealWall == self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction]
+        self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction] = hasRealWall
+        print "front wall expected " + str(wallExpected)
+        # print "front" + str(hasRealWall)+ " " + str(self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]])+ " " + str((frontCoord[0], frontCoord[1]))
+
+
+        return wallExpected
+
