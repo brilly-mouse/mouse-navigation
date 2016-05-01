@@ -58,6 +58,7 @@ class SimRun():
                     # and top is redundant with multiple boxes printed together.
                     box = self.mouse.board.boundaries[x][y]
                     omniscientBox = self.omniscientBoard.boundaries[x][y]
+                    # print str(box) + " printing!!!! " + str(omniscientBox) + " " + str(box == omniscientBox)
                     if omniscientBox[1]:
                         if box[1]:
                             initial[1] = "|"
@@ -77,7 +78,7 @@ class SimRun():
                     elif row == 1:
                         if omniscientBox[2]:
                             if box[2]:
-                                if(y == self.mouse.board.sideLength -1):
+                                if y == self.mouse.board.sideLength -1:
                                     initial[0] = "==="
                                     initial[1] = "="
                                 else:
@@ -92,7 +93,7 @@ class SimRun():
                                     initial[1] = "%"
 
                         if omniscientBox[1]:
-                            if(box[1]):
+                            if box[1] == omniscientBox[1]:
                                 initial[1] = "|"
                             else:
                                 initial[1] = "%"
@@ -112,7 +113,7 @@ class SimRun():
         hasRealWall = self.omniscientBoard.boundaries[frontCoord[0]][frontCoord[1]][direction]
         wallExpected = hasRealWall == self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction]
         self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction] = hasRealWall
-        print "front right wall expected " + str(wallExpected)
+        # print "front right wall expected " + str(wallExpected)
         # print "right" + str(hasRealWall) + " " + str(self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]])+ " " + str((frontCoord[0], frontCoord[1]))
 
         return wallExpected
@@ -122,7 +123,7 @@ class SimRun():
         frontCoord = self.mouse.forwardCoordinates()
         hasRealWall = self.omniscientBoard.boundaries[frontCoord[0]][frontCoord[1]][direction]
         wallExpected = hasRealWall == self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction]
-        print "front left wall expected " + str(wallExpected)
+        # print "front left wall expected " + str(wallExpected)
         self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction] = hasRealWall
         # print "left" + str(hasRealWall)+ " " + str(self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]]) + " " + str((frontCoord[0], frontCoord[1]))
 
@@ -134,7 +135,7 @@ class SimRun():
         hasRealWall = self.omniscientBoard.boundaries[frontCoord[0]][frontCoord[1]][direction]
         wallExpected = hasRealWall == self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction]
         self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]][direction] = hasRealWall
-        print "front wall expected " + str(wallExpected)
+        # print "front wall expected " + str(wallExpected)
         # print "front" + str(hasRealWall)+ " " + str(self.mouse.board.boundaries[frontCoord[0]][frontCoord[1]])+ " " + str((frontCoord[0], frontCoord[1]))
 
 

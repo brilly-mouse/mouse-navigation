@@ -212,10 +212,10 @@ class Mouse():
     def followPath(self):
         while(self.path):
             path = self.path[0]
-            print path
             moveSuccess = self.moveToSquare(path[0], path[1])
             if moveSuccess:
                 self.path = self.path[1:] # truncate after sucessful move
+                self.saved_path = self.saved_path[1:]
             else:
                 return # when found walls unexpected
         return # when finished following the path
@@ -224,6 +224,8 @@ class Mouse():
     def moveToSquare(self, x, y):
         if self.pause:
             print "movetoSquare " + str((x,y))
+            print "current situation in " + str((self.x, self.y))
+            print "existing " +  str(self.board.boundaries[self.x][self.y]) + " actual " +str(self.action.omniscientBoard.boundaries[self.x][self.y])
             command = raw_input("press n to continue")
             if command == "q":
                 exit()
