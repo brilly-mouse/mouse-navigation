@@ -20,6 +20,7 @@ class Mouse():
         self.direction = direction
         self.saved_path = []
         self.pause = pause
+        self.is_first_move = True
         if(realRun):
             self.action = LiveRun(self)
             self.board = board
@@ -201,6 +202,10 @@ class Mouse():
     """ Floodfill algorithm """
     def floodFillToGoal(self):
         while(not self.inGoal()):
+            if self.is_first_move:
+                self.is_first_move = False
+                self.path = [self.forwardCoordinates()]
+                # first move is always forward
             self.path = self.AStarSearch()
             self.followPath()
             # will follow path to completion if walls appropriate
